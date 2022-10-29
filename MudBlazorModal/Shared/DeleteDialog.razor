@@ -1,0 +1,46 @@
+﻿@inject IProductService ProductService
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem>
+                <MudText>@ContentText</MudText>
+            </MudItem>
+            <MudItem class="d-flex flex-row-reverse flex-grow-1 gap-1">
+                <MudButton Color="Color.Dark" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+                <MudButton OnClick="Submit" Color="@Color" Variant="Variant.Filled" Class="mx-2">@ButtonText</MudButton>
+            </MudItem>
+        </MudGrid>
+        <br />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string ContentText { get; set; }
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    public Product Product { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        Product =  ProductService.GetProductById(Id);
+    }
+
+    void Submit()
+    {
+        ProductService.DeleteProduct(Product);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    void Cancel() => MudDialog.Cancel();
+}

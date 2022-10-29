@@ -1,0 +1,76 @@
+﻿@page "/"
+@inject IDialogService DialogService
+@inject IProductService ProductService
+
+<PageTitle>Products</PageTitle>
+
+<MudTable Items=@Products Dense=true Hover=true>
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Category</MudTh>
+        <MudTh>Quantity</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.Category</MudTd>
+        <MudTd>@context.Quantity</MudTd>
+        <MudTd>
+            <MudIconButton @onclick="(() => ProductDetails(context.Id))"
+                           Icon="@Icons.Material.Filled.MoreHoriz"
+                           Variant="Variant.Filled"
+                           Color="@Color.Info"
+                           Size="Size.Small" />
+            <MudIconButton @onclick="(() => DeleteUserDialog(context.Name, context.Id))"
+                           Icon="@Icons.Filled.DeleteOutline"
+                           Variant="Variant.Filled"
+                           Color="Color.Error"
+                           Size="Size.Small" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+<br />
+<hr />
+<br />
+<MudButton Variant="Variant.Filled"
+           StartIcon="@Icons.Material.Filled.Add"
+           IconColor="Color.Info"
+           Size="Size.Medium"
+           @onclick="(() => ProductDetails(dummyId))">
+    new product
+</MudButton>
+
+
+@code {
+    public List<Product> Products { get; set; } = new();
+
+    private string dummyId = "0";
+
+    protected override void OnInitialized()
+    {
+        Products = ProductService.GetAllProducts();
+    }
+
+
+    private void ProductDetails(string id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Id", id);
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        DialogService.Show<ProductDialog>("Details", parameters, options);
+    }
+
+    private void DeleteUserDialog(string ItemName, string id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", $"Do you really want to delete {ItemName}? This process cannot be undone.");
+        parameters.Add("ButtonText", "Delete");
+        parameters.Add("Color", Color.Error);
+        parameters.Add("Id", id);
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        DialogService.Show<DeleteDialog>("Delete", parameters, options);
+    }
+}

@@ -1,0 +1,111 @@
+﻿@inject IProductService ProductService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6" Color="Color.Primary">
+            @if (Id != "0")
+            {
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" Color="Color.Primary" /> @modalTitle
+            }
+            else
+            {
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3" Color="Color.Primary" /> @modalTitle
+            }
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model=Product OnValidSubmit="SubmitProduct">
+            <DataAnnotationsValidator />
+            <hr class="p-0 m-0" />
+            <br />
+            <MudGrid>
+                @if (Id != "0")
+                {
+                        <MudItem lg="12">
+                            <MudTextField Disabled="true" Label="Id" @bind-Value=Product.Id Variant=Variant.Outlined></MudTextField>
+                        </MudItem>
+                }
+                <MudItem lg="12">
+                    <MudTextField 
+                        Label="Name" 
+                        @bind-Value=Product.Name
+                        For="@(() => Product.Name)"
+                        Variant=Variant.Outlined></MudTextField>
+                </MudItem>
+                <MudItem lg="12">
+                    <MudSelect 
+                        Dense="true" T="string" 
+                        Label="Category" 
+                        Variant="Variant.Outlined" 
+                        @bind-Value="Product.Category"
+                        For="@(() => Product.Category)">
+                        <MudSelectItem Value="@("Car")" />
+                        <MudSelectItem Value="@("Fruit")" />
+                        <MudSelectItem Value="@("Vegetable")" />
+                    </MudSelect>
+                </MudItem>
+                <MudItem lg="12">
+                    <MudTextField Label="Quantity"
+                                  @bind-Value=Product.Quantity
+                                  For="@(() => Product.Quantity)"
+                                  Variant=Variant.Outlined></MudTextField>
+                </MudItem>
+                <MudItem lg="12" class="d-flex flex-row-reverse flex-grow-1 gap-1">
+                    <MudButton Color="Color.Dark" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" Color="@Color" Variant="Variant.Filled" Class="mx-2">Save</MudButton>
+                </MudItem>
+            </MudGrid>
+            <br />
+            </EditForm>
+    </DialogContent>
+
+</MudDialog>
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public string Id { get; set; } = string.Empty;
+    [Parameter] public string Category { get; set; } = string.Empty;
+
+    [Parameter] public Color Color { get; set; } = Color.Primary;
+
+    public Product Product { get; set; } = new();
+    public string modalTitle = "Edit details";
+
+    protected override void OnInitialized()
+    {
+        if (Id != "0")
+        {
+            Product =  ProductService.GetProductById(Id);
+        }
+        else
+        {
+            Product = new Product();
+            modalTitle = "Add a new product";
+        }
+    }
+
+    void SubmitProduct()
+    {
+        Product productToDb = new();
+        if (Id == "0")
+        {
+            productToDb.Name = Product.Name;
+            productToDb.Category = Product.Category;
+            productToDb.Quantity = Product.Quantity;
+            ProductService.CreateProduct(productToDb);
+        }
+        else
+        {
+            ProductService.UpdateProduct(Product);
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}
