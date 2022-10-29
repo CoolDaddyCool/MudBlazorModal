@@ -14,7 +14,7 @@ namespace MudBlazorModal.Services
             },
             new Product()
             {
-                Name = "Audi",
+                Name = "BMW",
                 Category = "Car",
                 Quantity = 1
             },
